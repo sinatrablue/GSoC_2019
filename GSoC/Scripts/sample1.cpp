@@ -14,7 +14,7 @@ double df(ASTNode_t *ast){
     double x = ASTNode_getReal(ch1);
     double y = ASTNode_getReal(ch2);
     
-    // Because I am not sure I can the operand "*" from ast let's start with :
+    // Because I am not sure if I can get the operand "*" from ast let's start with :
     double z = y*x;
     return z;
 }
