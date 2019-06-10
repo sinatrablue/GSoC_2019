@@ -7,6 +7,9 @@ using namespace std;
 
 ASTNode_t* ast = SBML_parseFormula("k * A");
 
+/*I hope I translated well from C to C++
+for now there are only those types, I want to know if it is going the good way
+It made me understand the notion of 'evaluate' that we were talking about */
 double evalAST(ASTNode_t *ast){
 
     double result;
@@ -21,7 +24,7 @@ double evalAST(ASTNode_t *ast){
     // switch on the type of ast, the root node (in our case "*")
     switch(ASTNode_getType(ast)){
         case AST_INTEGER:
-        int result = ASTNode_getInteger(ast);
+        result = ASTNode_getInteger(ast);
         break;
 
         case AST_REAL:
