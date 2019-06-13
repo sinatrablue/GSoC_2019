@@ -14,7 +14,7 @@ It made me understand the notion of 'evaluate' that we were talking about */
 double evalAST(ASTNode_t *ast){
 
     double result;
-    int childnum = ASTNode_getNumChildren(ast);     // gets the number of children (in our case 2, k and A)
+    int childnum = ASTNode_getNumChildren(ast);     // gets the number of children
     ASTNode_t  **child = (ASTNode_t **) malloc(childnum * sizeof(ASTNode_t*));     // allocates as much ASTNode_t** as the node has children
 
     // get every child
