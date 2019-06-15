@@ -8,9 +8,9 @@
 #include<map>
 #include<cmath>
 
-double evalAST(ASTNode_t *ast, map<string, double> spec, ListOfParameters *loc);
+double evalAST(ASTNode_t *ast, std::map<std::string, double> spec, ListOfParameters *loc);
 
-map<string, double> euler(double t, map<string, double> spec, ASTNode_t *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc);
+std::map<std::string, double> euler(double t, std::map<std::string, double> spec, ASTNode_t *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc);
 
 
 #endif
