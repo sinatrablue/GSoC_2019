@@ -38,7 +38,6 @@ int main(int argc, char *argv[]){
     cin >> maxt;   // A bit stupid cause maxt won't be in seconds that way but we'll see later
 
 
-
     while(t<maxt){
         for(int i = 0 ; i < reacList->size() ; i++){
             ListOfSpeciesReferences *rList = reacList->get(i)->getListOfReactants();
@@ -49,7 +48,7 @@ int main(int argc, char *argv[]){
             KineticLaw_t *kin = Reaction_getKineticLaw(reac);
             const char *form = KineticLaw_getFormula(kin);
             ASTNode_t *ast = SBML_parseFormula(form);
-            ListOfParameters *loc = KineticLaw_getListOfLocalParameters(kin);
+            ListOfParameters* loc = reac->getKineticLaw()->getListOfParameters();
             // I can't do it on only one line because type 'Reaction' is apparently prevalent on type 'Reation_t' and so on
             /* Il manque les local parameters qu'un AST_NAME peut demander aussi */
             spec = euler(t, spec, ast, rList, pList, loc);
