@@ -1,6 +1,10 @@
 #include<iostream>
+#include<fstream>
 #include<sbml/SBMLTypes.h>
-#include<first_sim_functions.h>
+#include<string>
+#include<map>
+#include<cmath>
+#include "first_sim_functions.hpp"
 
 using namespace std;
 
@@ -33,29 +37,34 @@ int main(int argc, char *argv[]){
     cout << "Maximum time of simulation ?" << endl;
     cin >> maxt;   // A bit stupid cause maxt won't be in seconds that way but we'll see later
 
+
+
     while(t<maxt){
-    
         for(int i = 0 ; i < reacList->size() ; i++){
-            // Printing the time and initial species' amounts
-            cout << "Time :  " << t << endl;
             ListOfSpeciesReferences *rList = reacList->get(i)->getListOfReactants();
-            for(int j=0 ; j < rList->size() ; j++){
-                cout << "Specie :  " << rList->get(j)->getId(); << "\t" << "Amount :  " << rList->get(j)->getInitialAmount(); << endl;
-            }
+            ListOfSpeciesReferences *pList = reacList->get(i)->getListOfProducts();
 
             // Getting the formula of this reaction as an ASTNode_t*
             Reaction_t *reac = reacList->get(i);
             KineticLaw_t *kin = Reaction_getKineticLaw(reac);
             const char *form = KineticLaw_getFormula(kin);
             ASTNode_t *ast = SBML_parseFormula(form);
+            ListOfParameters *loc = KineticLaw_getListOfLocalParameters(kin);
             // I can't do it on only one line because type 'Reaction' is apparently prevalent on type 'Reation_t' and so on
-
-
-            /*Maintenant go juste appeler Euler en passant les réactants et produit + 'ast' non ? */
+            /* Il manque les local parameters qu'un AST_NAME peut demander aussi */
+            spec = euler(t, spec, ast, rList, pList, loc);
         }
+        
+        // Printing and pasting the new values in the output results file
+        ofstream outfile;
+        outfile.open("results.txt");
+        cout << "At time :  " << t << endl;
+        for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
+            cout << "Specie :  " << itr->first << '\t' << "Amount :  " << itr->second << endl;  // Print the result
+            outfile << itr->first << '\t' << t << '\t' << itr->second << endl;  // Paste the result in the output file
+        }
+        outfile.close();
     }
 
-    string reactantID = reacList->get(1)->getListOfReactants()->getId();
-
-    // Attention pour l'instant main ne retourne rien du tout
+    return EXIT_SUCCESS;
 }

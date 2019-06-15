@@ -3,10 +3,12 @@
 #include<sbml/SBMLTypes.h>
 #include<string>
 #include<map>
+#include<cmath>
+#include "first_sim_functions.hpp"
 
 using namespace std;
 
-double evalAST(ASTNode_t *ast){
+double evalAST(ASTNode_t *ast, map<string, double> spec, ListOfParameters *loc){
 
     double result;
     int childnum = ASTNode_getNumChildren(ast);     // gets the number of children
@@ -17,7 +19,6 @@ double evalAST(ASTNode_t *ast){
         child[i] = ASTNode_getChild(ast, i);
     }
 
-    // switch on the type of ast, the root node (in our case "*")
     switch(ASTNode_getType(ast)){
         case AST_INTEGER:
         result = ASTNode_getInteger(ast);
@@ -28,38 +29,52 @@ double evalAST(ASTNode_t *ast){
         break;
 
         case AST_NAME:
-        char *l;
-        double var;
-        printf("Give the (initial) value of variable : ");
-        printf("%s=", ASTNode_getName(ast));    // prints variable that needs a value
-        cin.getline(l, 20);     // reads value given by user
-        sscanf(l, "%lf", &var);     // stores the float value read in var 
-        delete(l);      // I read it as "free() in C ; delete() in C++" maybe it is not that trivial 
-        printf("%s = %f\n", ASTNode_getName(ast), var);     // confirmation message
-        result = var;
+        // If I understaood well I have to put all this case between bracket because of a specificity when declaring things like strings in a switch
+        {
+            string name = ASTNode_getName(ast);
+            for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){  // Iterate in map
+                if(name == itr->first){
+                    result = itr->second;    // Update the value of reactants involved in the reaction which calls the euler function
+                }
+            }
+            // If the variable was not in the species involved, check in the parameters
+            if(isnan(result)==true){
+                for(int i=0 ; i < loc->size() ; i++){
+                    if(name == loc->get(i)->getId()){
+                        result = loc->get(i)->getValue() ;
+                    }
+                }
+            }
+            // If it is still undifined, there is a problem, maybe with the variable names
+            if(isnan(result)==true){
+                cout << "Problem with variable :  " << name << '\n' << "~>  Unable to find its value" << endl;
+                exit(1);
+            }
+        }
+        return result;
         break;
 
         case AST_PLUS:
-        result = evalAST(child[0]) + evalAST(child[1]);
+        result = evalAST(child[0], spec, loc) + evalAST(child[1], spec, loc);
         break;
 
         case AST_MINUS:
         if(childnum==1)
-        result = - (evalAST(child[0]));
+        result = - (evalAST(child[0], spec, loc));
         else
-        result = evalAST(child[0]) - evalAST(child[1]);
+        result = evalAST(child[0], spec, loc) - evalAST(child[1], spec, loc);
         break;
 
         case AST_TIMES:     // which is going to be our case
-        result = evalAST(child[0]) * evalAST(child[1]) ;
+        result = evalAST(child[0], spec, loc) * evalAST(child[1], spec, loc) ;
         break;
 
         case AST_DIVIDE:
-        result = evalAST(child[0]) / evalAST(child[1]);
+        result = evalAST(child[0], spec, loc) / evalAST(child[1], spec, loc);
         break;
 
         case AST_POWER:
-        result = pow(evalAST(child[0]),evalAST(child[1]));
+        result = pow(evalAST(child[0], spec, loc),evalAST(child[1], spec, loc));
         break;
 
         default :
@@ -72,21 +87,30 @@ double evalAST(ASTNode_t *ast){
     return result;
 }
 
-void euler(double t, double yA, double yB, double dt, double maxt, ofstream &outfile){
-    map<double, pair<double, double> >result;
 
-    while(t<maxt){
-        pair<double, double> yy;
-        yy = make_pair(yA,yB);
-        pair<double, pair<double, double> > to_insert;
-        to_insert = make_pair(t, yy);
-        result.insert(to_insert);   // In the beginning of the loop to have the initial values as well
-        yA = yA+dt * evalAST(ast);
-        yB = 1-yA;  // Probably a bit a shame but I can't see any other relationship to be written between them
-        t=t+dt;
+map<string, double> euler(double t, map<string, double> spec, ASTNode_t *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
+
+    // Calculate from the equation of the reaction which calls the function
+    double res = evalAST(ast, spec, loc);
+
+    // For the reactants :
+    for(int i = 0 ; i < rList->size() ; i++){   // Iterate in reactant list
+        for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){  // Iterate in map
+            if(rList->get(i)->getId() == itr->first){
+                itr->second = itr->second - res;    // Update the value of reactants involved in the reaction which calls the euler function
+            }
+        }
     }
-    // Writting all the results generated by the function in the output file
-    for(map<double, pair<double, double> >::iterator it=result.begin(); it!=result.end(); it++){
-        outfile << it->first << '\t' << it->second.first << '\t' << it->second.second << endl;
+
+    // For the products :
+    // Nothing changes appart from "pList", we can use the same values' names for iterator and erase their content
+    for(int i = 0 ; i < pList->size() ; i++){
+       for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
+           if(rList->get(i)->getId() == itr->first){
+                itr->second = itr->second + res;
+            }
+        }
     }
+
+    return spec;
 }
