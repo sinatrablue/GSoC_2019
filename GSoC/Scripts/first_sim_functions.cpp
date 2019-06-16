@@ -8,7 +8,7 @@
 
 using namespace std;
 
-double evalAST(ASTNode_t *ast, map<string, double> spec, ListOfParameters *loc){
+double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *loc){
 
     double result;
     int childnum = ASTNode_getNumChildren(ast);     // gets the number of children
@@ -32,24 +32,25 @@ double evalAST(ASTNode_t *ast, map<string, double> spec, ListOfParameters *loc){
         // If I understaood well I have to put all this case between bracket because of a specificity when declaring things like strings in a switch
         {
             string name = ASTNode_getName(ast);
+            cout << "AST_NAME :  " << name << endl;
             for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){  // Iterate in map
                 if(name == itr->first){
                     result = itr->second;    // Update the value of reactants involved in the reaction which calls the euler function
+                    cout << "YES1" << endl;
+                    cout << "RESULT1 :  " << result << endl; 
                 }
             }
             // If the variable was not in the species involved, check in the parameters
-            if(isnan(result)==true){
-                for(int i=0 ; i < loc->size() ; i++){
-                    if(name == loc->get(i)->getId()){
-                        result = loc->get(i)->getValue() ;
-                    }
+            for(int i=0 ; i < loc->size() ; i++){
+                if(name == loc->get(i)->getId()){
+                    result = loc->get(i)->getValue() ;
+                    cout << "YES2" << endl;
+                    cout << "RESULT2 :  " << result << endl;
                 }
             }
-            // If it is still undifined, there is a problem, maybe with the variable names
-            if(isnan(result)==true){
-                cout << "Problem with variable :  " << name << '\n' << "~>  Unable to find its value" << endl;
-                exit(1);
-            }
+        // If it is still undifined, there is a problem, maybe with the variable names
+        // cout << "Problem with variable :  " << name << '\n' << "~>  Unable to find its value" << endl;
+        // exit(1);
         }
         return result;
         break;
@@ -88,28 +89,27 @@ double evalAST(ASTNode_t *ast, map<string, double> spec, ListOfParameters *loc){
 }
 
 
-map<string, double> euler(double t, map<string, double> spec, ASTNode_t *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
+map<string, double> euler(map<string, double> spec, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
 
     // Calculate from the equation of the reaction which calls the function
     double res = evalAST(ast, spec, loc);
-
+    cout << "  Résultat evalAST :  " << res << endl;
     // For the reactants :
     for(int i = 0 ; i < rList->size() ; i++){   // Iterate in reactant list
-        for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){  // Iterate in map
-            if(rList->get(i)->getId() == itr->first){
-                itr->second = itr->second - res;    // Update the value of reactants involved in the reaction which calls the euler function
-            }
-        }
+        map<string, double>::iterator itr = spec.find(rList->get(i)->getId());
+        if(itr != spec.end()){
+            itr->second -= res;    // Update the value of reactants involved in the reaction which calls the euler function
+        } 
     }
+    
 
     // For the products :
     // Nothing changes appart from "pList", we can use the same values' names for iterator and erase their content
     for(int i = 0 ; i < pList->size() ; i++){
-       for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
-           if(rList->get(i)->getId() == itr->first){
-                itr->second = itr->second + res;
-            }
-        }
+    map<string, double>::iterator itr = spec.find(pList->get(i)->getId());
+        if(itr != spec.end()){
+            itr->second += res;
+        } 
     }
 
     return spec;
