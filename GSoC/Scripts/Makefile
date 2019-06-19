@@ -6,3 +6,6 @@ first_simulator.o : first_simulator.cpp first_sim_functions.hpp
 
 first_sim_functions.o : first_sim_functions.cpp
 	g++ -I/opt/local/include -c first_sim_functions.cpp
+
+clean:
+	rm first_sim_functions.o first_simulator.o simul
