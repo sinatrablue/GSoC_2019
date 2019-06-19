@@ -75,6 +75,7 @@ double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *l
         break;
 
         case AST_POWER:
+        case AST_FUNCTION_POWER:
         result = pow(evalAST(child[0], spec, loc),evalAST(child[1], spec, loc));
         break;
 
