@@ -96,7 +96,7 @@ map<string, double> euler(map<string, double> spec, const ASTNode *ast, ListOfSp
     cout << "  Résultat evalAST :  " << res << endl;
     // For the reactants :
     for(int i = 0 ; i < rList->size() ; i++){   // Iterate in reactant list
-        map<string, double>::iterator itr = spec.find(rList->get(i)->getId());
+        map<string, double>::iterator itr = spec.find(rList->get(i)->getSpecies());
         if(itr != spec.end()){
             itr->second -= res;    // Update the value of reactants involved in the reaction which calls the euler function
         } 
@@ -106,7 +106,7 @@ map<string, double> euler(map<string, double> spec, const ASTNode *ast, ListOfSp
     // For the products :
     // Nothing changes appart from "pList", we can use the same values' names for iterator and erase their content
     for(int i = 0 ; i < pList->size() ; i++){
-    map<string, double>::iterator itr = spec.find(pList->get(i)->getId());
+    map<string, double>::iterator itr = spec.find(pList->get(i)->getSpecies());
         if(itr != spec.end()){
             itr->second += res;
         } 

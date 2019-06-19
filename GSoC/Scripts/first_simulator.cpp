@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
     ListOfReactions *reacList = mod->getListOfReactions();
 
     double t=0;
-    double dt = 0.5;
+    double dt = 0.05;
     double maxt;
     cout << "Maximum time of simulation ?" << endl;
     cin >> maxt;   // A bit stupid cause maxt won't be in seconds that way but we'll see later
