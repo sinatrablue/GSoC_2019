@@ -36,16 +36,16 @@ double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *l
             for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){  // Iterate in map
                 if(name == itr->first){
                     result = itr->second;    // Update the value of reactants involved in the reaction which calls the euler function
-                    cout << "YES1" << endl;
-                    cout << "RESULT1 :  " << result << endl; 
+                    //cout << "YES1" << endl;
+                    //cout << "RESULT1 :  " << result << endl; 
                 }
             }
             // If the variable was not in the species involved, check in the parameters
             for(int i=0 ; i < loc->size() ; i++){
                 if(name == loc->get(i)->getId()){
                     result = loc->get(i)->getValue() ;
-                    cout << "YES2" << endl;
-                    cout << "RESULT2 :  " << result << endl;
+                    //cout << "YES2" << endl;
+                    //cout << "RESULT2 :  " << result << endl;
                 }
             }
         // If it is still undifined, there is a problem, maybe with the variable names

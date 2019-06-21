@@ -37,16 +37,23 @@ int main(int argc, char *argv[]){
     double t=0;
     double dt = 0.05;
     double maxt;
-    double diff = 0;
     cout << "Maximum time of simulation ?" << endl;
     cin >> maxt;   // A bit stupid cause maxt won't be in seconds that way but we'll see later
 
     ofstream outfile;
     outfile.open("results.txt");
-    // Initial values in output file
-    for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
-        outfile << itr->first << '\t' << t << '\t' << itr->second << endl;
+    // First line with names
+    outfile << "t" << '\t';
+    for(int w = 0 ; w < spList->size() ; w++){
+        outfile << spList->get(w)->getId() << '\t';
     }
+    outfile << endl;
+    // Initial values in output file
+    outfile << t << '\t';
+    for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end(); itr++){
+        outfile << itr->second << '\t';
+    }
+    outfile << endl;
     while(t<=maxt){
         for(int i = 0 ; i < reacList->size() ; i++){
             ListOfSpeciesReferences *rList = reacList->get(i)->getListOfReactants();
@@ -63,11 +70,13 @@ int main(int argc, char *argv[]){
         
         // Printing and pasting the new values in the output results file
         cout << "At time :  " << t << endl;
+        outfile << t << '\t';
         for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
-            cout << "Specie :  " << itr->first << '\t' << "Amount :  " << itr->second << endl;  // Print the result
+            cout << "Specie :  " << itr->first << '\t' << "Amount :  " << itr->second << endl;
             cout << "==================================================================" << endl;
-            outfile << itr->first << '\t' << t << '\t' << itr->second << endl;  // Paste the result in the output file
-        } // ici aussi correction pour le fichier de sortie
+            outfile << itr->second << '\t';
+        }
+        outfile << endl;
         t += dt;
     }
     outfile.close();
