@@ -9,7 +9,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-    // Read SBML file
+	// Read SBML file
     SBMLDocument *doc = readSBML(argv[1]);
 
     // First of all checking for errors
@@ -26,8 +26,10 @@ int main(int argc, char *argv[]){
     ListOfSpecies *spList = mod->getListOfSpecies();
     // For evry specie, add in the map its ID as key and initial amount
     for(int v=0 ; v < spList->size() ; v++){
-        spec.insert(pair<string, double>(spList->get(v)->getId(), spList->get(v)->getInitialAmount())); 
-    }
+        pair<string, double> to_insert;
+        to_insert = make_pair(spList->get(v)->getId(), spList->get(v)->getInitialAmount());
+        spec.insert(to_insert); 
+    } // ici correction
     
     // Getting the list of reactions
     ListOfReactions *reacList = mod->getListOfReactions();
@@ -35,11 +37,16 @@ int main(int argc, char *argv[]){
     double t=0;
     double dt = 0.05;
     double maxt;
+    double diff = 0;
     cout << "Maximum time of simulation ?" << endl;
     cin >> maxt;   // A bit stupid cause maxt won't be in seconds that way but we'll see later
 
     ofstream outfile;
     outfile.open("results.txt");
+    // Initial values in output file
+    for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
+        outfile << itr->first << '\t' << t << '\t' << itr->second << endl;
+    }
     while(t<=maxt){
         for(int i = 0 ; i < reacList->size() ; i++){
             ListOfSpeciesReferences *rList = reacList->get(i)->getListOfReactants();
@@ -51,10 +58,7 @@ int main(int argc, char *argv[]){
             ListOfParameters* loc = reac->getKineticLaw()->getListOfParameters();
             // I can't do it on only one line because type 'Reaction' is apparently prevalent on type 'Reation_t' and so on
 
-            spec = euler(spec, ast, rList, pList, loc);
-            for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
-            cout << itr->first << '\t' << itr->second << endl;  // Print the result
-            }
+            spec = euler(dt, spec, ast, rList, pList, loc);
         }
         
         // Printing and pasting the new values in the output results file
@@ -62,8 +66,8 @@ int main(int argc, char *argv[]){
         for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
             cout << "Specie :  " << itr->first << '\t' << "Amount :  " << itr->second << endl;  // Print the result
             cout << "==================================================================" << endl;
-            outfile << itr->first << '\t' << itr->second << endl;  // Paste the result in the output file
-        }
+            outfile << itr->first << '\t' << t << '\t' << itr->second << endl;  // Paste the result in the output file
+        } // ici aussi correction pour le fichier de sortie
         t += dt;
     }
     outfile.close();

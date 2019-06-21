@@ -12,7 +12,7 @@ LIBSBML_CPP_NAMESPACE_USE
 
 double evalAST(const ASTNode *ast, std::map<std::string, double> spec, ListOfParameters *loc);
 
-std::map<std::string, double> euler(std::map<std::string, double> spec, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc);
+std::map<std::string, double> euler(double dt, std::map<std::string, double> spec, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc);
 
 
 #endif

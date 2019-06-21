@@ -90,16 +90,21 @@ double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *l
 }
 
 
-map<string, double> euler(map<string, double> spec, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
+map<string, double> euler(double dt, map<string, double> spec, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
 
     // Calculate from the equation of the reaction which calls the function
     double res = evalAST(ast, spec, loc);
-    cout << "  Résultat evalAST :  " << res << endl;
+    res += dt;
+    // Et en vrai c'est à peu près tout pour cette fonction elle retourne ça et voilà merci
+
+    //cout << "  Résultat evalAST :  " << res << endl;   test qui sert plus à rien
+
+
     // For the reactants :
     for(int i = 0 ; i < rList->size() ; i++){   // Iterate in reactant list
         map<string, double>::iterator itr = spec.find(rList->get(i)->getSpecies());
         if(itr != spec.end()){
-            itr->second -= res;    // Update the value of reactants involved in the reaction which calls the euler function
+            itr->second -= res+dt;    // Update the value of reactants involved in the reaction which calls the euler function
         } 
     }
     
@@ -109,7 +114,7 @@ map<string, double> euler(map<string, double> spec, const ASTNode *ast, ListOfSp
     for(int i = 0 ; i < pList->size() ; i++){
     map<string, double>::iterator itr = spec.find(pList->get(i)->getSpecies());
         if(itr != spec.end()){
-            itr->second += res;
+            itr->second += res+dt;
         } 
     }
 
