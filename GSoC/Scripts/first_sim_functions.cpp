@@ -32,7 +32,6 @@ double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *l
         // If I understaood well I have to put all this case between bracket because of a specificity when declaring things like strings in a switch
         {
             string name = ASTNode_getName(ast);
-            cout << "AST_NAME :  " << name << endl;
             for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){  // Iterate in map
                 if(name == itr->first){
                     result = itr->second;    // Update the value of reactants involved in the reaction which calls the euler function
@@ -90,33 +89,28 @@ double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *l
 }
 
 
-map<string, double> euler(double dt, map<string, double> spec, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
+map<string, double> evalREACT(double dt, map<string, double> spec, std::map<std::string, double> dxdt, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
 
     // Calculate from the equation of the reaction which calls the function
     double res = evalAST(ast, spec, loc);
-    res += dt;
-    // Et en vrai c'est à peu près tout pour cette fonction elle retourne ça et voilà merci
-
-    //cout << "  Résultat evalAST :  " << res << endl;   test qui sert plus à rien
-
 
     // For the reactants :
     for(int i = 0 ; i < rList->size() ; i++){   // Iterate in reactant list
-        map<string, double>::iterator itr = spec.find(rList->get(i)->getSpecies());
-        if(itr != spec.end()){
-            itr->second -= res+dt;    // Update the value of reactants involved in the reaction which calls the euler function
-        } 
+        map<string, double>::iterator itr = dxdt.find(rList->get(i)->getSpecies());
+        if(itr != dxdt.end()){
+            itr->second -= res*dt;    // Update the value of dxdt for the reactants involved in the reaction
+        }
     }
     
 
     // For the products :
     // Nothing changes appart from "pList", we can use the same values' names for iterator and erase their content
     for(int i = 0 ; i < pList->size() ; i++){
-    map<string, double>::iterator itr = spec.find(pList->get(i)->getSpecies());
-        if(itr != spec.end()){
-            itr->second += res+dt;
+    map<string, double>::iterator itr = dxdt.find(pList->get(i)->getSpecies());
+        if(itr != dxdt.end()){
+            itr->second += res*dt;
         } 
     }
 
-    return spec;
+    return dxdt;
 }

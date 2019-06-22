@@ -24,13 +24,14 @@ int main(int argc, char *argv[]){
     map<string, double> spec;
     // Getting the list of species
     ListOfSpecies *spList = mod->getListOfSpecies();
-    // For evry specie, add in the map its ID as key and initial amount
+    // For every specie, add in the map its ID as key and initial amount
     for(int v=0 ; v < spList->size() ; v++){
         pair<string, double> to_insert;
         to_insert = make_pair(spList->get(v)->getId(), spList->get(v)->getInitialAmount());
         spec.insert(to_insert); 
-    } // ici correction
-    
+    }
+
+
     // Getting the list of reactions
     ListOfReactions *reacList = mod->getListOfReactions();
 
@@ -55,6 +56,15 @@ int main(int argc, char *argv[]){
     }
     outfile << endl;
     while(t<=maxt){
+        // Initializing a second map for the dx/dt
+        // Getting the ID of the species and initializing all the values at 0
+        map<string, double> dxdt;
+        for(int v=0 ; v < spList->size() ; v++){
+            pair<string, double> insert;
+            insert = make_pair(spList->get(v)->getId(), 0);
+            dxdt.insert(insert);
+        }
+
         for(int i = 0 ; i < reacList->size() ; i++){
             ListOfSpeciesReferences *rList = reacList->get(i)->getListOfReactants();
             ListOfSpeciesReferences *pList = reacList->get(i)->getListOfProducts();
@@ -65,9 +75,18 @@ int main(int argc, char *argv[]){
             ListOfParameters* loc = reac->getKineticLaw()->getListOfParameters();
             // I can't do it on only one line because type 'Reaction' is apparently prevalent on type 'Reation_t' and so on
 
-            spec = euler(dt, spec, ast, rList, pList, loc);
+            dxdt = evalREACT(dt, spec, dxdt, ast, rList, pList, loc);
         }
-        
+        // After all reactions are evaluated, update the species' values :
+        for(map<string, double>::iterator itr = spec.begin() ; itr != spec.end() ; itr++){
+            cout << itr->first << endl;
+            for(map<string, double>::iterator i = dxdt.begin() ; i != dxdt.end() ; i++){
+                if(itr->first == i->first){
+                    itr->second += i->second;
+                }
+            }
+        }
+        cout << "test" << endl;
         // Printing and pasting the new values in the output results file
         cout << "At time :  " << t << endl;
         outfile << t << '\t';
