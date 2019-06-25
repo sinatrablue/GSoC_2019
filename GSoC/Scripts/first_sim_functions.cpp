@@ -89,7 +89,7 @@ double evalAST(const ASTNode *ast, map<string, double> spec, ListOfParameters *l
 }
 
 
-void evalREACT(double &dt, map<string, double> &spec, std::map<std::string, double> &dxdt, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
+map<string, double> evalREACT(double &dt, map<string, double> &spec, std::map<std::string, double> &dxdt, const ASTNode *ast, ListOfSpeciesReferences *rList, ListOfSpeciesReferences *pList, ListOfParameters *loc){
 
     // Calculate from the equation of the reaction which calls the function
     double res = evalAST(ast, spec, loc);
@@ -111,4 +111,6 @@ void evalREACT(double &dt, map<string, double> &spec, std::map<std::string, doub
             itr->second += res*dt;
         } 
     }
+
+    return dxdt;
 }

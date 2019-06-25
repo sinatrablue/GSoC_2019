@@ -75,8 +75,9 @@ int main(int argc, char *argv[]){
             ListOfParameters* loc = reac->getKineticLaw()->getListOfParameters();
             // I can't do it on only one line because type 'Reaction' is apparently prevalent on type 'Reation_t' and so on
 
-            dxdt = evalREACT(&dt, spec, dxdt, ast, rList, pList, loc);
+            dxdt = evalREACT(dt, spec, dxdt, ast, rList, pList, loc);
         }
+
         // After all reactions are evaluated, update the species' values :
         for(auto itr = spec.begin() ; itr != spec.end() ; itr++){
             cout << itr->first << endl;
@@ -86,6 +87,7 @@ int main(int argc, char *argv[]){
                 }
             }
         }
+        
         cout << "test" << endl;
         // Printing and pasting the new values in the output results file
         cout << "At time :  " << t << endl;
